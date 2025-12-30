@@ -10,9 +10,17 @@ WITH orders AS (
     FROM {{ ref ('stg_local_bike__order_items') }}
 )
 
+
+, customers AS (
+    SELECT 
+    *
+    FROM {{ ref ('stg_local_bike__customers') }}
+)
+
 SELECT 
     o.order_id
     , o.customer_id
+    , c.customer_name
     , o.store_id
     , o.staff_id
     , o.order_status
@@ -28,10 +36,12 @@ SELECT
 
 FROM orders o
 LEFT JOIN items i ON o.order_id = i.order_id
+LEFT JOIN customers c ON c.customer_id = o.customer_id
 
 GROUP BY
     o.order_id
     , o.customer_id
+    , c.customer_name
     , o.store_id
     , o.staff_id
     , o.order_status
