@@ -4,12 +4,13 @@ sources:
   - name: googles_analytics_4
     schema: google_analytics_4
     tables:
-      - name: events_20210131
+      - name: events_2021_01_01_05
       
-  - name: google_sheets
-    schema: google_sheets
+  - name: google_sheet
+    schema: google_sheet
     tables:
-      - name: account_manager_region_mapping
+      - name: data_gsheet_test
+      - name: marketing_budget
 
   - name: sales_database
     schema: sales_database
@@ -21,3 +22,23 @@ sources:
       - name: order_item
       - name: seller
       - name: user
+      
+  - name : spotify
+    schema: spotify
+    tables:
+      - name: songs
+      - name: listening_data
+
+  - name : local_bike_dataset
+    schema: local_bike_dataset
+    tables:
+      - name: brands
+      - name: categories
+      - name: customers
+      - name: order_items
+      - name: orders
+      - name: products
+      - name: staffs
+      - name: stocks
+      - name: stores
+

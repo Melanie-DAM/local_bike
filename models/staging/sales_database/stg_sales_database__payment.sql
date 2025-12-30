@@ -4,4 +4,4 @@ select CONCAT(order_id, '_', payment_sequential) AS payment_id,
  payment_type,
  payment_installments,
  payment_value
-from {{ source('sales_database', 'payment') }}
+from {{ source('databird_ae_sales_data', 'payment') }}
