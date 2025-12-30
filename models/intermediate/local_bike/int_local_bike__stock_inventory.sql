@@ -10,24 +10,22 @@ WITH stocks AS (
     FROM {{ ref ('stg_local_bike__products')}}
 )
 
-, categories AS (
+, stores AS (
     SELECT
     *
-    FROM {{ ref ('stg_local_bike__categories')}}
+    FROM {{ ref ('stg_local_bike__stores')}}
 )
 
-, brands AS (
-    SELECT
-    *
-    FROM {{ ref ('stg_local_bike__brands')}}
-)
 
 SELECT
     s.store_id
+    , st.store_name
+    , st.store_city
+    , st.store_state
+    , st.store_zip_code
+    , st.store_street
     , p.product_id
     , p.product_name
-    , c.category_name
-    , b.brand_name
     , s.quantity AS current_stock
     , CASE 
         WHEN s.quantity = 0 THEN 'Out of stock'
@@ -37,5 +35,4 @@ SELECT
 
 FROM stocks s
 LEFT JOIN products p ON p.product_id = s.product_id
-LEFT JOIN categories c ON c.category_id = p.category_id
-LEFT JOIN brands b ON b.brand_id = p.brand_id
+LEFT JOIN stores st ON st.store_id = s.store_id
