@@ -1,34 +1,6 @@
 version: 2
 
 sources:
-  - name: googles_analytics
-    schema: google_analytics
-    tables:
-      - name: events_2021_01_01_05
-      
-  - name: google_sheet
-    schema: google_sheet
-    tables:
-      - name: data_gsheet_test
-      - name: marketing_budget
-
-  - name: sales_database
-    schema: sales_database
-    tables:
-      - name: feedback
-      - name: payment
-      - name: product
-      - name: order
-      - name: order_item
-      - name: seller
-      - name: user
-      
-  - name : spotify
-    schema: spotify
-    tables:
-      - name: songs
-      - name: listening_data
-
   - name : local_bike_dataset
     schema: local_bike_dataset
     tables:
