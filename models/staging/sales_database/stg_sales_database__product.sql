@@ -7,4 +7,4 @@ select product_id,
  cast(product_length_cm as int) as product_length_cm,
  cast(product_height_cm as int) as product_height_cm,
  cast(product_width_cm as int) as product_width_cm
-from {{ source('sales_database', 'product') }}
+from {{ source('databird_ae_sales_data', 'product') }}
