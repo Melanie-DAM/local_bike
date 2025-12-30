@@ -22,7 +22,7 @@ WITH staffs AS (
     , o.shipped_date
     , o.required_date
     FROM staffs s
-    INNER JOIN orders o ON s.staff_id = o.staff_id 
+    INNER JOIN orders o ON s.staff_id = o.staff_id
     ) 
     
 SELECT 
@@ -30,6 +30,7 @@ SELECT
     , staff_name
     , store_id
     , manager_id
+    , order_date
     , order_year
     , COUNT(order_id) AS total_orders_processed
 
@@ -39,4 +40,5 @@ GROUP BY
     , staff_name
     , store_id
     , manager_id
+    , order_date
     , order_year
