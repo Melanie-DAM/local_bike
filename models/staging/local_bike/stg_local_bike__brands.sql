@@ -1,3 +1,10 @@
-SELECT
+WITH brands AS (
+    SELECT
     *
-from {{ source('local_bike_dataset', 'brands') }}
+    FROM {{ source('local_bike_dataset', 'brands') }}
+)
+
+SELECT 
+    brand_id
+    , brand_name
+    FROM brands

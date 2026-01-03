@@ -1,10 +1,15 @@
+WITH order_items AS (
+    SELECT
+    *
+    FROM {{ source('local_bike_dataset', 'order_items') }}
+)
+
 SELECT
-    order_id
-    , item_id
-    , product_id
-    , quantity
-    , list_price AS unit_price
-    , discount
-    , ROUND((quantity * list_price) , 2) AS order_item_revenue
-    , ROUND((quantity * list_price) * (1 - discount), 2) AS order_item_net_revenue
-from {{ source('local_bike_dataset', 'order_items') }}
+    SAFE_CAST(order_id AS INT64) AS order_id
+    , SAFE_CAST(item_id AS INT64) AS item_id
+    , SAFE_CAST(product_id AS INT64) AS product_id
+    , CAST(quantity AS INT64) AS quantity
+
+    , CAST(list_price AS NUMERIC) AS unit_price
+    , SAFE_CAST(discount AS NUMERIC) AS discount
+FROM order_items
