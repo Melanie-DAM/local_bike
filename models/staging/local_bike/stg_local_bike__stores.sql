@@ -1,8 +1,14 @@
+WITH stores AS (
+    SELECT
+    *
+    FROM {{ source('local_bike_dataset', 'stores') }}
+)
+
 SELECT
-    store_id
-    , store_name
-    , city AS store_city
-    , state AS store_state
-    , zip_code AS store_zip_code
-    , street AS store_street
-from {{ source('local_bike_dataset', 'stores') }}
+    SAFE_CAST(store_id AS INT64) AS store_id
+    , TRIM(store_name) AS store_name
+    , UPPER(TRIM(city)) AS store_city
+    , UPPER(TRIM(state)) AS store_state
+    , CAST(zip_code AS STRING) AS store_zip_code
+    , TRIM(street) AS store_street
+FROM stores
