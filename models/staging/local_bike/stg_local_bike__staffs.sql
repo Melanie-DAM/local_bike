@@ -15,10 +15,10 @@ FROM staffs
 )
 
 SELECT
-s.staff_id
-, s.staff_name
-, s.manager_id
-, m.staff_name AS manager_name
-, s.store_id
+    s.staff_id
+    , s.staff_name
+    , s.manager_id
+    , m.staff_name AS manager_name
+    , s.store_id
 FROM staff_managers s
 LEFT JOIN staff_managers m ON s.manager_id = m.staff_id
