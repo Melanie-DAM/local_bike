@@ -24,16 +24,13 @@ WITH orders_perf AS (
 
 , staffs AS (
     SELECT
-    staf.staff_id
-    , staf.staff_name
-    , staf.manager_id
-    , man.staff_name as manager_name
-    , staf.store_id
-    FROM {{ ref('stg_local_bike__staffs') }} staf 
-    LEFT JOIN {{ ref ('stg_local_bike__staffs')}} man ON staf.manager_id = man.staff_id
-
+    staff_id
+    , staff_name
+    , manager_id
+    , manager_name
+    , store_id
+    FROM {{ ref('stg_local_bike__staffs') }} 
 )
-
 
 SELECT 
     ord.order_id
