@@ -1,3 +1,10 @@
-SELECT
+WITH categories AS (
+    SELECT
     *
-from {{ source('local_bike_dataset', 'categories') }}
+    FROM {{ source('local_bike_dataset', 'categories') }}
+)
+
+SELECT 
+    category_id
+    , category_name
+    FROM categories
