@@ -41,6 +41,7 @@ WITH orders AS (
         , o.required_date
         , o.shipped_date
         , oi.product_id
+        , pe.product_name
         , pe.category_name
         , pe.brand_name
 
