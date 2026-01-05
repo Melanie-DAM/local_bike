@@ -38,10 +38,6 @@ WITH staff AS (
 
         -- Revenu moyen par commande pour mesurer la qualité de la vente (upselling)
         , SAFE_DIVIDE(so.total_revenue, so.total_orders) AS avg_order_value
-
-        , so.total_orders
-        , so.total_revenue
-        , so.avg_processing_time
     FROM staff s
     LEFT JOIN staff_orders so ON s.staff_id = so.staff_id
 )
