@@ -22,6 +22,8 @@ WITH orders_perf AS (
 
     , store_id
     , staff_id
+    , category_name
+    , brand_name
 
     , total_order_amount
     , total_order_amount_net
@@ -73,6 +75,9 @@ WITH orders_perf AS (
         , st.staff_name
         , st.manager_id
         , st.manager_name
+
+        , ord.category_name
+        , ord.brand_name
 
         , ord.total_order_amount
         , ord.total_order_amount_net

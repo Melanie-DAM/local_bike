@@ -21,6 +21,15 @@ WITH orders AS (
     FROM {{ ref('stg_local_bike__order_items') }}
 )
 
+, products_enriched AS (
+    SELECT
+        product_id
+        , product_name
+        , category_name
+        , brand_name
+    FROM {{ ref('int_local_bike__dim_items') }}
+)
+
 , orders_cleaned AS (
     SELECT 
         o.order_id
@@ -32,12 +41,16 @@ WITH orders AS (
         , o.required_date
         , o.shipped_date
         , oi.product_id
+        , pe.category_name
+        , pe.brand_name
+
         , ROUND(SUM((oi.quantity * oi.unit_price)),2) AS total_order_amount
         , ROUND(SUM((oi.quantity * oi.unit_price) * (1 - oi.discount)),2) AS total_order_amount_net
         , COUNT(oi.product_id) AS total_items_count
     FROM orders o
     LEFT JOIN order_items oi ON o.order_id = oi.order_id
-    GROUP BY 1,2,3,4,5,6,7,8,9
+    LEFT JOIN products_enriched pe ON pe.product_id = oi.product_id
+    GROUP BY ALL
 )
 
 SELECT
