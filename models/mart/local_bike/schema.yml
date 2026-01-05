@@ -126,7 +126,7 @@ models:
           - accepted_values:
               values: ['Top 80% (Core)', 'Bottom 20% (Long Tail)']
 
-  - name: mart_local_bike__fact_stock_optinimzation
+  - name: mart_local_bike__fact_stock_optimization
     description: "Table de pilotage des stocks. Elle analyse la vélocité des ventes pour prédire 
       la durée de vie restante du stock par produit et par magasin."
     columns:
