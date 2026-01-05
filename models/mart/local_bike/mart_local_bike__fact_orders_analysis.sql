@@ -1,3 +1,5 @@
+{{ config(materialized='table') }}
+
 WITH orders_perf AS (
     SELECT 
     order_id

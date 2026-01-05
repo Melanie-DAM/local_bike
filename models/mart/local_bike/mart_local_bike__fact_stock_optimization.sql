@@ -1,3 +1,5 @@
+{{ config(materialized='table') }}
+
 WITH stock_velocity AS (
     SELECT
     *

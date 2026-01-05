@@ -1,3 +1,5 @@
+{{ config(materialized='table') }}
+
 WITH product_agg AS (
     SELECT 
         product_id
