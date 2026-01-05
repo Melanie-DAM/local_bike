@@ -1,4 +1,27 @@
-WITH orders_cleaned AS (
+WITH orders AS (
+    SELECT 
+        order_id
+        , customer_id
+        , store_id
+        , staff_id
+        , order_status
+        , order_date
+        , required_date
+        , shipped_date
+    FROM {{ ref('stg_local_bike__orders') }}
+)
+
+, order_items AS (
+    SELECT
+        order_id
+        , product_id
+        , quantity
+        , unit_price
+        , discount
+    FROM {{ ref('stg_local_bike__order_items') }}
+)
+
+, orders_cleaned AS (
     SELECT 
         o.order_id
         , o.customer_id
@@ -8,12 +31,13 @@ WITH orders_cleaned AS (
         , o.order_date
         , o.required_date
         , o.shipped_date
+        , oi.product_id
         , ROUND(SUM((oi.quantity * oi.unit_price)),2) AS total_order_amount
         , ROUND(SUM((oi.quantity * oi.unit_price) * (1 - oi.discount)),2) AS total_order_amount_net
         , COUNT(oi.product_id) AS total_items_count
-    FROM {{ ref('stg_local_bike__orders') }} o
-    LEFT JOIN {{ ref('stg_local_bike__order_items') }} oi ON o.order_id = oi.order_id
-    GROUP BY 1,2,3,4,5,6,7,8
+    FROM orders o
+    LEFT JOIN order_items oi ON o.order_id = oi.order_id
+    GROUP BY 1,2,3,4,5,6,7,8,9
 )
 
 SELECT

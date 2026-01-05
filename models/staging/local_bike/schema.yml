@@ -1,0 +1,147 @@
+version: 2
+
+models:
+  - name: stg_local_bike__brands
+    description: "Liste des marques de vélos."
+    columns:
+      - name: brand_id
+        description: "Identifiant unique de la marque."
+        tests:
+          - unique
+          - not_null
+      - name: brand_name
+        description: "Nom de la marque."
+
+  - name: stg_local_bike__categories
+    description: "Catégories de produits (ex: Mountain Bikes, Road Bikes)."
+    columns:
+      - name: category_id
+        description: "Identifiant unique de la catégorie."
+        tests:
+          - unique
+          - not_null
+      - name: category_name
+        description: "Nom de la catégorie."
+
+  - name: stg_local_bike__customers
+    description: "Informations de base sur les clients."
+    columns:
+      - name: customer_id
+        description: "Identifiant unique du client."
+        tests:
+          - unique
+          - not_null
+      - name: customer_name
+        description: "Nom complet du client (NOM Prénom)."
+      - name: customer_city
+        description: "Ville de résidence du client."
+      - name: customer_state
+        description: "État de résidence du client."
+
+  - name: stg_local_bike__order_items
+    description: "Détails des articles contenus dans chaque commande."
+    columns:
+      - name: order_id
+        description: "Référence de la commande."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_local_bike__orders')
+              field: order_id
+      - name: item_id
+        description: "Identifiant de la ligne dans la commande."
+        tests:
+          - not_null
+      - name: product_id
+        description: "Référence du produit vendu."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_local_bike__products')
+              field: product_id
+      - name: quantity
+        description: "Nombre d'unités vendues."
+      - name: unit_price
+        description: "Prix unitaire au moment de la vente."
+      - name: discount
+        description: "Remise appliquée sur l'article."
+
+  - name: stg_local_bike__orders
+    description: "Entêtes des commandes passées par les clients."
+    columns:
+      - name: order_id
+        description: "Identifiant unique de la commande."
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Référence du client."
+        tests:
+          - not_null
+      - name: order_status
+        description: "Statut de la commande (1: Pending, 2: Processing, 3: Rejected, 4: Completed)."
+      - name: order_date
+        description: "Date de création de la commande."
+
+  - name: stg_local_bike__products
+    description: "Catalogue des produits disponibles."
+    columns:
+      - name: product_id
+        description: "Identifiant unique du produit."
+        tests:
+          - unique
+          - not_null
+      - name: brand_id
+        description: "Référence à la marque."
+        tests:
+          - relationships:
+              to: ref('stg_local_bike__brands')
+              field: brand_id
+      - name: category_id
+        description: "Référence à la catégorie."
+        tests:
+          - relationships:
+              to: ref('stg_local_bike__categories')
+              field: category_id
+      - name: unit_price
+        description: "Prix catalogue du produit."
+
+  - name: stg_local_bike__staffs
+    description: "Liste du personnel incluant la hiérarchie des managers."
+    columns:
+      - name: staff_id
+        description: "Identifiant unique de l'employé."
+        tests:
+          - unique
+          - not_null
+      - name: manager_id
+        description: "Identifiant du manager direct (Auto-jointure)."
+      - name: manager_name
+        description: "Nom complet du manager."
+      - name: store_id
+        description: "Magasin d'affectation."
+
+  - name: stg_local_bike__stocks
+    description: "État des stocks par magasin et produit."
+    columns:
+      - name: store_id
+        description: "Référence du magasin."
+        tests:
+          - not_null
+      - name: product_id
+        description: "Référence du produit."
+        tests:
+          - not_null
+      - name: quantity
+        description: "Quantité disponible en stock."
+
+  - name: stg_local_bike__stores
+    description: "Informations sur les points de vente physiques."
+    columns:
+      - name: store_id
+        description: "Identifiant unique du magasin."
+        tests:
+          - unique
+          - not_null
+      - name: store_name
+        description: "Nom du magasin."

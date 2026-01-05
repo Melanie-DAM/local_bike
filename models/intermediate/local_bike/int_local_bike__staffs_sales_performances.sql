@@ -22,24 +22,29 @@ WITH staff AS (
     GROUP BY 1, 2, 3
 )
 
-SELECT
-    s.staff_id
-    , s.staff_name
-    , s.manager_id
-    , s.manager_name
-    , s.store_id
-    , so.order_date
+, staff_orders_enriched AS (
+    SELECT
+        s.staff_id
+        , s.staff_name
+        , s.manager_id
+        , s.manager_name
+        , s.store_id
+        , so.order_date
 
-    , so.total_orders
-    , so.total_revenue
-    , so.total_revenue_net
-    , so.avg_processing_time
+        , so.total_orders
+        , so.total_revenue
+        , so.total_revenue_net
+        , so.avg_processing_time
 
-    -- Revenu moyen par commande pour mesurer la qualité de la vente (upselling)
-    , SAFE_DIVIDE(so.total_revenue, so.total_orders) AS avg_order_value
+        -- Revenu moyen par commande pour mesurer la qualité de la vente (upselling)
+        , SAFE_DIVIDE(so.total_revenue, so.total_orders) AS avg_order_value
 
-    , so.total_orders
-    , so.total_revenue
-    , so.avg_processing_time
-FROM staff s
-LEFT JOIN staff_orders so ON s.staff_id = so.staff_id
+        , so.total_orders
+        , so.total_revenue
+        , so.avg_processing_time
+    FROM staff s
+    LEFT JOIN staff_orders so ON s.staff_id = so.staff_id
+)
+
+SELECT *
+FROM staff_orders_enriched
