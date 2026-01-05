@@ -1,3 +1,5 @@
+{{ config(materialized='table') }}
+
 WITH staff_sales_perf AS (
     SELECT
         staff_id

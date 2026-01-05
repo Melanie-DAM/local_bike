@@ -1,0 +1,181 @@
+version: 2
+
+models:
+  - name: int_local_bike__orders_performances
+    description: "Modèle intermédiaire consolidant les données de commandes avec leurs métriques financières (montants bruts et nets) et leurs indicateurs de performance de livraison (délais, retards)."
+    columns:
+      - name: order_id
+        description: "Identifiant unique de la commande."
+        tests:
+          - unique
+          - not_null
+
+      - name: customer_id
+        description: "Référence du client ayant passé la commande."
+        tests:
+          - not_null
+
+      - name: store_id
+        description: "Magasin où la commande a été enregistrée."
+
+      - name: staff_id
+        description: "Vendeur ayant traité la commande."
+
+      - name: order_status
+        description: "Statut actuel de la commande."
+
+      - name: order_date
+        description: "Date de création de la commande."
+        tests:
+          - not_null
+
+      - name: required_date
+        description: "Date de livraison maximale promise au client."
+
+      - name: shipped_date
+        description: "Date réelle d'expédition de la commande."
+
+      - name: total_order_amount
+        description: "Montant total brut de la commande (quantité * prix unitaire) avant remise."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+      - name: total_order_amount_net
+        description: "Montant total net après application des remises (discounts)."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+      - name: total_items_count
+        description: "Nombre total de produits distincts dans la commande."
+
+      - name: processing_time_days
+        description: "Nombre de jours écoulés entre la commande et l'expédition."
+
+      - name: days_diff_from_required
+        description: "Écart en jours entre la date d'expédition et la date requise."
+
+  - name: int_local_bike__staffs_sales_performances
+    description: "Modèle de performance des employés combinant les informations RH (managers, magasins) et les métriques de vente agrégées par jour. Permet d'analyser l'efficacité des vendeurs et leur contribution au chiffre d'affaires."
+    columns:
+      - name: staff_id
+        description: "Identifiant unique de l'employé."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_local_bike__staffs')
+              field: staff_id
+
+      - name: staff_name
+        description: "Nom complet du vendeur (Format: NOM Prénom)."
+
+      - name: manager_id
+        description: "Identifiant du manager direct."
+
+      - name: manager_name
+        description: "Nom complet du manager de l'employé."
+
+      - name: store_id
+        description: "Identifiant du magasin où travaille l'employé."
+        tests:
+          - not_null
+
+      - name: order_date
+        description: "Date de la performance (basée sur la date de commande)."
+
+      - name: total_orders
+        description: "Nombre total de commandes traitées par l'employé ce jour-là."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+      - name: total_revenue
+        description: "Chiffre d'affaires brut généré par l'employé."
+
+      - name: total_revenue_net
+        description: "Chiffre d'affaires net (après remises) généré par l'employé."
+
+      - name: avg_processing_time
+        description: "Délai moyen de traitement des commandes (en jours) pour cet employé."
+
+      - name: avg_order_value
+        description: "Panier moyen par commande (Total Revenue / Total Orders). 
+          Indicateur de la capacité de l'employé à faire de l'upselling."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+  - name: int_local_bike__product_pricing_performance
+    description: "Modèle de performance des prix par ligne de produit. 
+      Il calcule les écarts entre les montants bruts et nets et identifie les transactions 
+      ayant bénéficié de remises pour analyser l'élasticité et l'impact des promotions."
+    columns:
+      - name: product_id
+        description: "Identifiant unique du produit."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_local_bike__products')
+              field: product_id
+
+      - name: unit_price
+        description: "Prix unitaire catalogue appliqué lors de la vente."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+      - name: total_gross_amount
+        description: "Montant total avant remise (Prix * Quantité)."
+
+      - name: total_net_amount
+        description: "Montant réellement encaissé après déduction de la remise."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+      - name: discount_amount
+        description: "Valeur monétaire de la réduction accordée sur cette ligne."
+
+      - name: is_discounted
+        description: "Indicateur booléen : TRUE si une remise a été appliquée (discount > 0)."
+        tests:
+          - not_null
+
+      - name: quantity
+        description: "Nombre d'unités vendues pour cette ligne."
+
+  - name: int_local_bike__stock_velocity
+    description: "Modèle intermédiaire calculant la vélocité des ventes (unités par jour) sur les 90 derniers jours 
+      et l'autonomie théorique du stock restant. Ce modèle sert de base aux alertes de réapprovisionnement."
+    columns:
+      - name: store_id
+        description: "Identifiant du magasin."
+        tests:
+          - not_null
+
+      - name: product_id
+        description: "Identifiant du produit."
+        tests:
+          - not_null
+
+      - name: current_stock_level
+        description: "Quantité actuellement disponible en magasin."
+
+      - name: stock_status
+        description: "Classification simple du niveau de stock (Out of stock, Low stock, Good stock)."
+        tests:
+          - accepted_values:
+              values: ['Out of stock', 'Low stock', 'Good stock']
+
+      - name: daily_sales_velocity
+        description: "Moyenne des unités vendues par jour calculée sur une période de 90 jours. "
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+      - name: days_of_stock_remaining
+        description: "Estimation du nombre de jours avant rupture de stock si le rythme de vente actuel se maintient. 
+          Valeur fixée à 999 si le produit est en stock mais n'a eu aucune vente."
+        tests:
+          - not_null

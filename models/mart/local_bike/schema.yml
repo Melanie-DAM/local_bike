@@ -1,0 +1,165 @@
+version: 2
+
+models:
+  - name: mart_local_bike__fact_orders_analysis
+    description:  "Table de faits enrichie regroupant toutes les informations relatives aux commandes, incluant les indicateurs de performance (KPIs), les détails géographiques des magasins et la hiérarchie du personnel. C'est la table principale pour le reporting des ventes."
+    columns:
+      - name: order_id
+        description: "Clé primaire de la commande."
+        tests:
+          - unique
+          - not_null
+
+      - name: order_status_description
+        description: "Libellé textuel du statut (Pending, Processing, Rejected, Completed)."
+        tests:
+          - accepted_values:
+              values: ['Pending', 'Processing', 'Rejected', 'Completed', 'Other']
+
+      - name: order_date
+        description: "Date de passation de la commande."
+        tests:
+          - not_null
+
+      - name: is_late_shipping
+        description: "Indicateur binaire (1/0) de retard de livraison."
+        tests:
+          - accepted_values:
+              values: [0, 1]
+
+      - name: store_name
+        description: "Nom du magasin où la vente a été réalisée."
+        tests:
+          - not_null
+
+      - name: store_city
+        description: "Ville du magasin pour analyse géographique."
+
+      - name: staff_name
+        description: "Nom du vendeur responsable de la commande."
+
+      - name: manager_name
+        description: "Nom du manager du vendeur au moment de la vente."
+
+      - name: total_order_amount_net
+        description: "Chiffre d'affaires net généré (après remises)."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+      - name: processing_time_days
+        description: "Délai logistique entre la commande et l'expédition effective."
+
+  - name: mart_local_bike__fact_staff_productivity
+    description: "Table de faits finale dédiée à l'analyse de la productivité du personnel. Elle croise les performances de vente individuelles avec les statistiques globales du magasin pour calculer des indices de contribution et de charge de travail (Workload)."
+    columns:
+      - name: staff_id
+        description: "Identifiant unique du membre du personnel."
+        tests:
+          - not_null
+
+      - name: staff_name
+        description: "Nom complet de l'employé."
+
+      - name: store_name
+        description: "Nom du magasin d'affectation."
+
+      - name: order_date
+        description: "Date de l'analyse (grain journalier)."
+
+      - name: total_orders
+        description: "Nombre de commandes traitées par l'employé ce jour-là."
+
+      - name: total_revenue_net
+        description: "Chiffre d'affaires net généré par l'employé."
+
+      - name: pct_contribution_to_store
+        description: "Part (en %) des commandes du magasin traitées par cet employé. Calculé comme (Total Orders Staff / Total Orders Store) * 100."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 100
+
+      - name: store_workload_index
+        description: "Indice de charge de travail du magasin. Nombre moyen de commandes par employé dans ce magasin (Total Orders Store / Staff Count)."
+        tests:
+          - not_null
+
+      - name: avg_order_value
+        description: "Panier moyen réalisé par l'employé."
+
+  - name: mart_local_bike__fact_pricing_strategy
+    description: "Table d'analyse stratégique du catalogue produit. Elle utilise la loi de Pareto (80/20) pour segmenter les produits en fonction de leur contribution au chiffre d'affaires net global. Permet d'identifier les références critiques pour le stock."
+    columns:
+      - name: product_id
+        description: "Clé primaire du produit."
+        tests:
+          - unique
+          - not_null
+
+      - name: product_name
+        description: "Nom du produit."
+
+      - name: total_units_sold
+        description: "Volume total de ventes en unités."
+
+      - name: total_net_revenue
+        description: "Chiffre d'affaires net total après remises."
+        tests:
+          - not_null
+
+      - name: avg_discount_rate
+        description: "Taux de remise moyen appliqué sur ce produit (0.10 = 10%)."
+
+      - name: cumul_rev_pct_of_total
+        description: "Pourcentage cumulé du revenu global (trié par revenu décroissant). Une valeur de 0.5 signifie que ce produit et les précédents représentent 50% du CA total."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+              max_value: 1
+
+      - name: pareto_segment
+        description: "Classification du produit : 
+          'Top 80% (Core)' pour les produits générant les premiers 80% du CA.
+          'Bottom 20% (Long Tail)' pour les autres."
+        tests:
+          - accepted_values:
+              values: ['Top 80% (Core)', 'Bottom 20% (Long Tail)']
+
+  - name: mart_local_bike__fact_stock_optimization
+    description: "Table de pilotage des stocks. Elle analyse la vélocité des ventes pour prédire 
+      la durée de vie restante du stock par produit et par magasin."
+    columns:
+      - name: product_id
+        description: "Identifiant unique du produit."
+        tests:
+          - not_null
+
+      - name: store_id
+        description: "Identifiant unique du magasin."
+        tests:
+          - not_null
+
+      - name: store_name
+        description: "Nom du magasin."
+
+      - name: current_stock_level
+        description: "Quantité actuellement disponible en rayon/réserve."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
+
+      - name: inventory_health_status
+        description: "Statut de santé basé sur le nombre de jours de stock restant"
+        tests:
+          - accepted_values:
+              values: ['CRITICAL: Reorder', 'WARNING: Low Stock', 'SURPLUS: Overstock', 'Healthy']
+
+      - name: available_in_other_stores
+        description: "Quantité totale du même produit disponible dans l'ensemble des autres magasins."
+
+      - name: monthly_turnover_rate
+        description: "Taux de rotation mensuel estimé."
+        tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              min_value: 0
